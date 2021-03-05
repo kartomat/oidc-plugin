@@ -2,7 +2,7 @@ import Origo from 'Origo';
 
 const Oidc = function Oidc(options = {}) {
   const { autoHide = 'never', closeIcon = '#ic_close_24px', menuIcon = '#fa-user' } = options;
-  let { signOutFunction = defaultSignOut, initialAccessToken } = options;
+  let { signOutFunction = defaultSignOut, oidc_user } = options;
   let viewer;
   let map;
   let target;
@@ -19,36 +19,22 @@ const Oidc = function Oidc(options = {}) {
   let userNameItem;
   let userNameItemEl;
   let signOut;
-  let userName;
+  let displayName;
 
-  console.log('initialAccessToken', initialAccessToken);
-  if (initialAccessToken === undefined || initialAccessToken === '') {
-    console.log('no access token, returning undefined');
+  console.log('oidc_user', oidc_user);
+  if (!oidc_user) {
+    console.log('no user object, returning undefined');
     return;
   }
   console.log('did not return');
 
-  function parseJwt(token) {
-    try {
-      return JSON.parse(atob(token.split('.')[1]));
-    } catch (e) {
-      return null;
-    }
-  }
-
-  function signIn() {
-    var auth2 = gapi.auth2.getAuthInstance();
-    auth2.signIn({
-      scope: 'email profile openid',
-      prompt: 'consent'
-    });
-  }
-
   function defaultSignOut() {
-    var auth2 = gapi.auth2.getAuthInstance();
-    auth2.signOut().then(function () {
-      console.log('User signed out.');
-    });
+    console.log('signout default');
+  }
+
+  function readUser() {
+    const user_string = window.sessionStorage.getItem('oidc_user');
+    oidc_user = JSON.parse(user_string);
   }
 
   const toggleUserMenu = function toggleUserMenu() {
@@ -115,8 +101,7 @@ const Oidc = function Oidc(options = {}) {
     name: 'oidc',
     close,
     onInit() {
-      const decodedToken = parseJwt(initialAccessToken);
-      userName = decodedToken.name || '';
+      displayName = oidc_user.displayname
       console.log('init');
       const menuButtonCls = isExpanded ? ' faded' : '';
       userAvatarButton = Origo.ui.Button({
@@ -140,7 +125,7 @@ const Oidc = function Oidc(options = {}) {
       });
 
       userNameItem = MenuItem({
-        title: userName, 
+        title: displayName, 
         useButton: false
       })
 
