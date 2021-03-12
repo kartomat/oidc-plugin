@@ -19,11 +19,11 @@ const Oidc = function Oidc(options = {}) {
   let userNameItem;
   let userNameItemEl;
   let signOut;
-  let userName;
-  //initialAccessToken
+  let displayName;
+
   console.log('oidc_user', oidc_user);
-  if (oidc_user === undefined || oidc_user.access_token === '') {
-    console.log('no access token, returning undefined');
+  if (!oidc_user) {
+    console.log('no user object, returning undefined');
     return;
   }
   console.log('did not return');
@@ -41,14 +41,7 @@ const Oidc = function Oidc(options = {}) {
   };
 
   const onMapClick = function onMapClick() {
-    // if (autoHide === 'always') {
     close();
-    // } else if (autoHide === 'mobile') {
-    //   const size = viewer.getSize();
-    //   if (size === 'm' || size === 's' || size === 'xs') {
-    //     close();
-    //   }
-    // }
   };
 
   const MenuItem = function MenuItem({ icon, click, title = '', useButton = true } = {}) {
@@ -92,7 +85,7 @@ const Oidc = function Oidc(options = {}) {
     name: 'oidc',
     close,
     onInit() {
-      userName = oidc_user.displayname
+      displayName = oidc_user.displayname
       console.log('init');
       const menuButtonCls = isExpanded ? ' faded' : '';
       userAvatarButton = Origo.ui.Button({
@@ -116,7 +109,7 @@ const Oidc = function Oidc(options = {}) {
       });
 
       userNameItem = MenuItem({
-        title: userName, 
+        title: displayName, 
         useButton: false
       })
 
