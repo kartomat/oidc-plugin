@@ -2,7 +2,7 @@ import Origo from 'Origo';
 
 const Oidc = function Oidc(options = {}) {
   const { autoHide = 'never', closeIcon = '#ic_close_24px', menuIcon = '#fa-user' } = options;
-  let { signOutFunction = defaultSignOut, initialAccessToken } = options;
+  let { signOutFunction = defaultSignOut, oidc_user } = options;
   let viewer;
   let map;
   let target;
@@ -20,36 +20,13 @@ const Oidc = function Oidc(options = {}) {
   let userNameItemEl;
   let signOut;
   let userName;
-
-  console.log('initialAccessToken', initialAccessToken);
-  if (initialAccessToken === undefined || initialAccessToken === '') {
+  //initialAccessToken
+  console.log('oidc_user', oidc_user);
+  if (oidc_user === undefined || oidc_user.access_token === '') {
     console.log('no access token, returning undefined');
     return;
   }
   console.log('did not return');
-
-  function parseJwt(token) {
-    try {
-      return JSON.parse(atob(token.split('.')[1]));
-    } catch (e) {
-      return null;
-    }
-  }
-
-  function signIn() {
-    var auth2 = gapi.auth2.getAuthInstance();
-    auth2.signIn({
-      scope: 'email profile openid',
-      prompt: 'consent'
-    });
-  }
-
-  function defaultSignOut() {
-    var auth2 = gapi.auth2.getAuthInstance();
-    auth2.signOut().then(function () {
-      console.log('User signed out.');
-    });
-  }
 
   const toggleUserMenu = function toggleUserMenu() {
     oidcMenuEl.classList.toggle('faded');
@@ -115,8 +92,7 @@ const Oidc = function Oidc(options = {}) {
     name: 'oidc',
     close,
     onInit() {
-      const decodedToken = parseJwt(initialAccessToken);
-      userName = decodedToken.name || '';
+      userName = oidc_user.displayname
       console.log('init');
       const menuButtonCls = isExpanded ? ' faded' : '';
       userAvatarButton = Origo.ui.Button({
