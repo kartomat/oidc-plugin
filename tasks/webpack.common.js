@@ -21,12 +21,12 @@ module.exports = {
             corejs: 3
           }]
         ],
-        plugins: [
-          ['@babel/plugin-transform-runtime', {
-            regenerator: true,
-            corejs: 2
-          }]
-        ]
+        // plugins: [
+        //   ['@babel/plugin-transform-runtime', {
+        //     regenerator: true,
+        //     corejs: 2
+        //   }]
+        // ]
       }
     }]
   },
@@ -34,9 +34,9 @@ module.exports = {
   resolve: {
     extensions: ['*', '.js', '.scss']
   },
-  plugins: [
-    new webpack.ProvidePlugin({
-      fetch: 'imports-loader?this=>global!exports-loader?global.fetch!whatwg-fetch'
-    })
-  ]
+  // plugins: [
+  //   new webpack.ProvidePlugin({
+  //     fetch: 'imports-loader?this=>global!exports-loader?global.fetch!whatwg-fetch'
+  //   })
+  // ]
 };

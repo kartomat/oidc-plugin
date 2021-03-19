@@ -1,197 +1,147 @@
-import Origo from 'Origo';
+function getParameterByName(name, url) {
+  var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)');
+  name = name.replace(/[\[\]]/g, '\\$&');
+  var results = regex.exec(url);
+  if (!results) return null;
+  if (!results[2]) return '';
+  return decodeURIComponent(results[2].replace(/\+/g, ' '));
+}
 
-const Oidc = function Oidc(options = {}) {
-  const { autoHide = 'never', closeIcon = '#ic_close_24px', menuIcon = '#fa-user' } = options;
-  let { signOutFunction = defaultSignOut, oidc_user } = options;
-  let viewer;
-  let map;
-  let target;
-  let isExpanded = false;
-  let headerComponent;
-  let contentComponent;
-  let closeButton;
-  let oidcMenu;
-  let oidcMenuEl;
-  let userAvatarButton;
-  let userAvatarButtonEl;
-  let logoutButton;
-  let logoutButtonEl;
-  let userNameItem;
-  let userNameItemEl;
-  let signOut;
-  let displayName;
+function Oidc(options) {
 
-  console.log('oidc_user', oidc_user);
-  if (!oidc_user) {
-    console.log('no user object, returning undefined');
-    return;
+  function getUser() {
+    const userString = window.sessionStorage.getItem('oidc_user');
+    if (userString === 'undefined') return null;
+    const oidcUser = JSON.parse(userString);
+    return oidcUser;
   }
-  console.log('did not return');
 
-  const toggleUserMenu = function toggleUserMenu() {
-    oidcMenuEl.classList.toggle('faded');
-    userAvatarButtonEl.classList.toggle('faded');
-    isExpanded = !isExpanded;
-  };
+  function redirectToAuthorize() {
+    window.location = options.authorizeEndpoint;
+  }
 
-  const close = function close() {
-    if (isExpanded) {
-      toggleUserMenu();
+  function setUser(user) {
+    //If a user is successfully found, initialize the origo component with options and user.
+    if (user) {
+      window.sessionStorage.setItem('oidc_user', JSON.stringify(user));
+    } else {
+      sessionStorage.removeItem('oidc_user');
     }
-  };
+  }
 
-  const onMapClick = function onMapClick() {
-    close();
-  };
-
-  const MenuItem = function MenuItem({ icon, click, title = '', useButton = true } = {}) {
-    let button;
-    if (useButton) {
-      button = Origo.ui.Button({
-        cls: 'icon-smaller compact no-grow',
-        click,
-        icon
+  async function getTokensByCode(code) {
+    try {
+      const response = await fetch(options.tokenEndpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          code
+        })
       });
-    }
-    const titleCmp = Origo.ui.Element({ cls: 'grow padding-left', innerHTML: title });
-    return Origo.ui.Component({
-      close,
-      onInit() {
-        console.log('MENUITEMoninit');
-        if (useButton) this.addComponent(button);
-      },
-      onAdd() {
-        console.log('MENUITEMonadd');
-        this.on('render', this.onRender);
-      },
-      onRender() {
-        console.log('MENUITEMonrender');
-        if (useButton) {
-          document.getElementById(titleCmp.getId()).addEventListener('click', () => {
-            button.dispatch('click');
-          });
-        }
-      },
-      render() {
-        return `<li class="flex row align-center padding-x padding-y-smaller ${useButton ? 'hover pointer' : ''}">
-                  ${useButton ? button.render() : ''}
-                  ${titleCmp.render()}
-                </li>`;
+      if (response.ok) {
+        const user = await response.json();
+        setUser(user);
+        return;
       }
-    });
-  };
-
-  return Origo.ui.Component({
-    name: 'oidc',
-    close,
-    onInit() {
-      displayName = oidc_user.displayname
-      console.log('init');
-      const menuButtonCls = isExpanded ? ' faded' : '';
-      userAvatarButton = Origo.ui.Button({
-        icon: menuIcon,
-        cls: `control icon-smaller medium round absolute light top-right${menuButtonCls}`,
-        style: 'top: 4rem',
-        tooltipText: 'User menu',
-        tooltipPlacement: 'west',
-        click() {
-          toggleUserMenu();
-        }
-      });
-
-      closeButton = Origo.ui.Button({
-        cls: 'small round margin-top-small margin-right-small icon-smaller grey-lightest',
-        ariaLabel: 'Stäng användare',
-        icon: closeIcon,
-        click() {
-          toggleUserMenu();
-        }
-      });
-
-      userNameItem = MenuItem({
-        title: displayName, 
-        useButton: false
-      })
-
-      logoutButton = MenuItem({
-        icon: closeIcon,
-        click() {
-          signOutFunction();
-        },
-        title: 'Logga ut'
-      });
-
-      headerComponent = Origo.ui.Element({
-        cls: 'flex row justify-end',
-        style: { width: '100%' },
-        components: [closeButton]
-      });
-
-      contentComponent = Origo.ui.Component({
-        render() {
-          return `<div class="relative width-12"><ul class="padding-y-small" id="${this.getId()}""></ul></div>`;
-        },
-        onRender() {
-          console.log('contentcomponentOnRender');
-        },
-        components: [userNameItem],
-        onAdd() {
-          this.addComponent(logoutButton);
-        }
-      });
-
-      oidcMenu = Origo.ui.Element({
-        cls: 'absolute flex column top-right control box bg-white overflow-hidden z-index-top faded',
-        collapseX: true,
-        style: 'top: 4rem',
-        onRender() {
-          console.log('oidcMenu-render');
-        },
-        components: [headerComponent, contentComponent]
-      });
-    },
-    onAdd(evt) {
-      console.log('onAdd');
-      viewer = evt.target;
-      target = document.getElementById(viewer.getMain().getId());
-      map = viewer.getMap();
-      this.on('render', this.onRender);
-      this.addComponents([userAvatarButton, oidcMenu]);
-      this.render();
-      viewer.getMap().on('click', onMapClick);
-    },
-    render() {
-      console.log('======render');
-
-      //Get menu as html and append as child of the viewer dom element.
-      const menuEl = Origo.ui.dom.html(oidcMenu.render());
-      target.appendChild(menuEl);
-
-      // Get menu dom node that was just added so Its easily accessible (mostly for menu toggle)
-      oidcMenuEl = document.getElementById(oidcMenu.getId());
-
-      // get menu button (avatariconbutton) as html and append as child of viewer element
-      const el = Origo.ui.dom.html(userAvatarButton.render());
-      target.appendChild(el);
-
-      //get dom node of menu button (avatariconbutton) so its easily accessible
-      userAvatarButtonEl = document.getElementById(userAvatarButton.getId());
-
-      //get the username list item as html and append as child of the content-component
-      userNameItemEl = Origo.ui.dom.html(userNameItem.render());
-      document.getElementById(contentComponent.getId()).appendChild(userNameItemEl);
-
-      //get the login button menu item as html and append as child of the content-component
-      logoutButtonEl = Origo.ui.dom.html(logoutButton.render());
-      document.getElementById(contentComponent.getId()).appendChild(logoutButtonEl);
-
-      // Dispatch render to the loginbutton so it attaches its eventhandler.
-      logoutButton.dispatch('render');
-
-      //Dispatch render on this. Not completely sure why yet but without it the avatar-button doesn't work.
-      this.dispatch('render');
+      throw 'Response from token endpoint is fail';
+    } catch (e) {
+      setUser(null);
+      console.error('Failed getting tokens, running callback as fail.');
+      throw e;
     }
-  });
-};
+  }
 
-export default Oidc;
+  //Ask for user info, return promise. Keep it concise.
+  async function verifyUser() {
+    try {
+      const user = getUser();
+      const response = await fetch(options.tokenEndpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          refresh_token: user.refresh_token
+        })
+      });
+      if (response.ok) {
+        const user = await response.json();
+        setUser(user);
+        return;
+      }
+      //If userinfo request fails throw exception so we can catch later.
+      throw 'The userinfo endpoint did NOT respond with an OK http code.';
+    } catch (e) {
+      setUser(null);
+      //If we fail completely (i.e. network error from fetch or unable to parse user as json), log error and run callback as unauthorized.
+      console.error('The user could not be verified, clearing user from sessionstorage and failing.');
+      throw e;
+    }
+  }
+
+  async function refreshExternalSession() {
+    try {
+      const user = getUser();
+      if (!user) {
+        return;
+      }
+      const response = await fetch(`${options.externalSessionUrl}?access_token=${user.access_token}`);
+      if (response.ok) {
+        console.log('Successfully refreshed external session');
+      } else {
+        throw 'External service did not respond with OK';
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  async function refresh() {
+    try {
+      await verifyUser();
+      if (options.updateSessionOnRefresh) {
+        await refreshExternalSession();
+      }
+    } catch (e) {
+      console.error('Error in refresh()', e);
+      throw e;
+    }
+  }
+
+  async function init() {
+    try {
+      const queryStringCode = getParameterByName('code', window.location.href);
+      const oidcUser = getUser();
+
+      //If there was a user in session storage
+      if (queryStringCode) {
+        await getTokensByCode(queryStringCode);
+        // TODO: run origo from subdir
+        window.history.replaceState({}, document.title, '/');
+        await refreshExternalSession();
+
+      } else if (oidcUser) {
+        await refresh();
+      }
+    } catch (e) {
+      setUser(null);
+      console.error('init fail', e);
+    }
+  }
+
+  return {
+    getUser: getUser,
+    authorize: redirectToAuthorize,
+    refresh: refresh,
+    init: init
+  };
+}
+
+function createOidcAuth(options, callback) {
+  const oidcInstance = new Oidc(options);
+  oidcInstance.init().finally(() => callback(oidcInstance));
+}
+
+export default createOidcAuth;
