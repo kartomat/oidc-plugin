@@ -8,7 +8,6 @@ function getParameterByName(name, url) {
 }
 
 function Oidc(options) {
-
   function getUser() {
     const userString = window.sessionStorage.getItem('oidc_user');
     if (userString === 'undefined') return null;
@@ -51,6 +50,19 @@ function Oidc(options) {
       console.error('Failed getting tokens, running callback as fail.');
       throw e;
     }
+  }
+
+  async function initRefreshTimeout(timeoutInMinutes) {
+    console.log('Initializing refresh timeout');
+    setTimeout(async () => {
+      try {
+        await refresh();
+      } catch(e) {
+        console.error('Something went wrong when refreshing at timeout', e);
+      } finally {
+        initRefreshTimeout(timeoutInMinutes);
+      }
+    }, timeoutInMinutes * 1000 * 60);
   }
 
   //Ask for user info, return promise. Keep it concise.
@@ -121,10 +133,10 @@ function Oidc(options) {
         // TODO: run origo from subdir
         window.history.replaceState({}, document.title, '/');
         await refreshExternalSession();
-
       } else if (oidcUser) {
         await refresh();
       }
+      initRefreshTimeout(options.sessionRefreshTimeout)
     } catch (e) {
       setUser(null);
       console.error('init fail', e);
