@@ -139,7 +139,6 @@ function Oidc(options) {
       initRefreshTimeout(options.sessionRefreshTimeout)
     } catch (e) {
       setUser(null);
-      console.error('init fail', e);
     }
   }
 
