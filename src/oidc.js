@@ -127,7 +127,6 @@ function Oidc(options) {
       }
     } catch (e) {
       setUser(null);
-      console.error('init fail', e);
     }
   }
 
