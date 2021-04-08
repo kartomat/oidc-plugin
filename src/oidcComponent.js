@@ -45,15 +45,12 @@ const OidcComponent = function OidcComponent(oidc) {
     return Origo.ui.Component({
       close,
       onInit() {
-        console.log('MENUITEMoninit');
         if (useButton) this.addComponent(button);
       },
       onAdd() {
-        console.log('MENUITEMonadd');
         this.on('render', this.onRender);
       },
       onRender() {
-        console.log('MENUITEMonrender');
         if (useButton) {
           document.getElementById(titleCmp.getId()).addEventListener('click', () => {
             button.dispatch('click');
@@ -73,7 +70,6 @@ const OidcComponent = function OidcComponent(oidc) {
     name: 'oidcComponent',
     close,
     onInit() {
-      console.log('init', oidc.getUser());
       const menuButtonCls = isExpanded ? ' faded' : '';
       userAvatarButton = Origo.ui.Button({
         icon: menuIcon,
@@ -138,7 +134,6 @@ const OidcComponent = function OidcComponent(oidc) {
       });
     },
     onAdd(evt) {
-      console.log('onAdd');
       viewer = evt.target;
       target = document.getElementById(viewer.getMain().getId());
       this.on('render', this.onRender);
@@ -147,8 +142,6 @@ const OidcComponent = function OidcComponent(oidc) {
       viewer.getMap().on('click', onMapClick);
     },
     render() {
-      console.log('======render');
-
       //Get menu as html and append as child of the viewer dom element.
       const menuEl = Origo.ui.dom.html(oidcMenu.render());
       target.appendChild(menuEl);

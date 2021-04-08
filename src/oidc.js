@@ -53,7 +53,6 @@ function Oidc(options) {
   }
 
   async function initRefreshTimeout(timeoutInMinutes) {
-    console.log('Initializing refresh timeout');
     setTimeout(async () => {
       try {
         await refresh();
@@ -101,7 +100,7 @@ function Oidc(options) {
       }
       const response = await fetch(`${options.externalSessionUrl}?access_token=${user.access_token}`);
       if (response.ok) {
-        console.log('Successfully refreshed external session');
+        console.warn('Successfully refreshed external session');
       } else {
         throw 'External service did not respond with OK';
       }
