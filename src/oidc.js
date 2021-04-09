@@ -1,3 +1,12 @@
+const anonymous ={
+  authenticated: false,
+  access_token: '',
+  refresh_token: '',
+  id_token: '',
+  expires_at: 0,
+  displayname: ''
+};
+
 function getParameterByName(name, url) {
   var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)');
   name = name.replace(/[\[\]]/g, '\\$&');
@@ -10,7 +19,7 @@ function getParameterByName(name, url) {
 function Oidc(options) {
   function getUser() {
     const userString = window.sessionStorage.getItem('oidc_user');
-    if (userString === 'undefined') return null;
+    if (userString === 'undefined') return anonymous;
     const oidcUser = JSON.parse(userString);
     return oidcUser;
   }
@@ -68,6 +77,9 @@ function Oidc(options) {
   async function verifyUser() {
     try {
       const user = getUser();
+      if (!user.authenticated) {
+        return;
+      }
       const response = await fetch(options.tokenEndpoint, {
         method: 'POST',
         headers: {
@@ -95,7 +107,7 @@ function Oidc(options) {
   async function refreshExternalSession() {
     try {
       const user = getUser();
-      if (!user) {
+      if (!user.authenticated) {
         return;
       }
       const response = await fetch(`${options.externalSessionUrl}?access_token=${user.access_token}`);
