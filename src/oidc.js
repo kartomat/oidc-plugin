@@ -1,4 +1,4 @@
-const anonymous ={
+const anonymous = {
   authenticated: false,
   access_token: '',
   refresh_token: '',
@@ -19,7 +19,7 @@ function getParameterByName(name, url) {
 function Oidc(options) {
   function getUser() {
     const userString = window.sessionStorage.getItem('oidc_user');
-    if (userString === 'undefined') return anonymous;
+    if (!userString || userString === 'undefined' || userString === 'null') return anonymous;
     const oidcUser = JSON.parse(userString);
     return oidcUser;
   }
@@ -65,7 +65,7 @@ function Oidc(options) {
     setTimeout(async () => {
       try {
         await refresh();
-      } catch(e) {
+      } catch (e) {
         console.error('Something went wrong when refreshing at timeout', e);
       } finally {
         initRefreshTimeout(timeoutInMinutes);
@@ -147,7 +147,7 @@ function Oidc(options) {
       } else if (oidcUser) {
         await refresh();
       }
-      initRefreshTimeout(options.sessionRefreshTimeout)
+      initRefreshTimeout(options.sessionRefreshTimeout);
     } catch (e) {
       setUser(null);
     }
