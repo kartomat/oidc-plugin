@@ -150,9 +150,10 @@ function Oidc(options) {
       //If there was a user in session storage
       if (queryStringCode) {
         await getTokensByCode(queryStringCode);
-        // TODO: run origo from subdir
-        window.history.replaceState({}, document.title, '/');
-        await refreshExternalSession();
+        window.history.replaceState({}, document.title, window.location.pathname);
+        if (options.externalSessionUrl) {
+          await refreshExternalSession();
+        }
       } else if (oidcUser) {
         await refresh();
       }
