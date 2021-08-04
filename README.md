@@ -56,3 +56,4 @@ Option | Type | Description
 `sessionRefreshTimeout` | number | Time interval to refresh OpenID tokens - Required
 `tokenEndpoint` | string | Path to origo server access token endpoint - Required
 `authorizeEndpoint` | string | Path to origo server authorize endpoint - Required
+`signOutUrl` | string | Redirects to set url after sign out if provided
