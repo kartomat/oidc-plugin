@@ -1,4 +1,4 @@
-# oidc-plugin
+# OIDC plugin
 Plugin for OpenID Connect authorization with Origo.
 
 Requires Origo 2.1.1 or later, Origo server with auth (not yet in the core) and an OpenID connect provider.
@@ -56,4 +56,3 @@ Option | Type | Description
 `sessionRefreshTimeout` | number | Time interval to refresh OpenID tokens - Required
 `tokenEndpoint` | string | Path to origo server access token endpoint - Required
 `authorizeEndpoint` | string | Path to origo server authorize endpoint - Required
-
