@@ -37,6 +37,15 @@ function Oidc(options) {
     }
   }
 
+  function signOut() {
+    setUser(null);
+    if (options.signOutUrl) {
+      document.location = options.signOutUrl;
+    } else {
+      document.location.reload();
+    }
+  }
+
   async function getTokensByCode(code) {
     try {
       const response = await fetch(options.tokenEndpoint, {
@@ -112,7 +121,7 @@ function Oidc(options) {
       }
       const response = await fetch(`${options.externalSessionUrl}?access_token=${user.access_token}`);
       if (response.ok) {
-        console.warn('Successfully refreshed external session');
+        console.info('Successfully refreshed external session');
       } else {
         throw 'External service did not respond with OK';
       }
@@ -141,9 +150,10 @@ function Oidc(options) {
       //If there was a user in session storage
       if (queryStringCode) {
         await getTokensByCode(queryStringCode);
-        // TODO: run origo from subdir
-        window.history.replaceState({}, document.title, '/');
-        await refreshExternalSession();
+        window.history.replaceState({}, document.title, window.location.pathname);
+        if (options.externalSessionUrl) {
+          await refreshExternalSession();
+        }
       } else if (oidcUser) {
         await refresh();
       }
@@ -157,6 +167,7 @@ function Oidc(options) {
     getUser: getUser,
     authorize: redirectToAuthorize,
     refresh: refresh,
+    signOut: signOut,
     init: init
   };
 }

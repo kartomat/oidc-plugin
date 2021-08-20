@@ -15,6 +15,7 @@ module.exports = merge(common, {
   module: {},
   devServer: {
     contentBase: './',
-    port: 9001
+    port: 9001,
+    writeToDisk: true
   }
 });

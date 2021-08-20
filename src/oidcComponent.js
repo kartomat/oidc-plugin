@@ -75,7 +75,7 @@ const OidcComponent = function OidcComponent(oidc) {
         icon: menuIcon,
         cls: `control icon-smaller medium round absolute light top-right${menuButtonCls}`,
         style: 'top: 4rem',
-        tooltipText: 'User menu',
+        tooltipText: 'Användarmeny',
         tooltipPlacement: 'west',
         click() {
           toggleUserMenu();
@@ -99,7 +99,7 @@ const OidcComponent = function OidcComponent(oidc) {
       logoutButton = MenuItem({
         icon: closeIcon,
         click() {
-          defaultSignOut();
+          oidc.signOut();
         },
         title: 'Logga ut'
       });
@@ -114,9 +114,6 @@ const OidcComponent = function OidcComponent(oidc) {
         render() {
           return `<div class="relative width-12"><ul class="padding-y-small" id="${this.getId()}""></ul></div>`;
         },
-        onRender() {
-          console.log('contentcomponentOnRender');
-        },
         components: [userNameItem],
         onAdd() {
           this.addComponent(logoutButton);
@@ -127,9 +124,6 @@ const OidcComponent = function OidcComponent(oidc) {
         cls: 'absolute flex column top-right control box bg-white overflow-hidden z-index-top faded',
         collapseX: true,
         style: 'top: 4rem',
-        onRender() {
-          console.log('oidcMenu-render');
-        },
         components: [headerComponent, contentComponent]
       });
     },
