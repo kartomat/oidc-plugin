@@ -32,7 +32,7 @@ OpenID connect provider, client id and client secret are configured in Origo ser
           tokenEndpoint: '/origoserver/auth/access_token',
           authorizeEndpoint: '/origoserver/auth/authorize',
           signOutUrl: 'url',
-          clientId: 'clientId',
+          clientId: 'sigtuna',
         },
         client => {
           if (client.getUser().authenticated) {
