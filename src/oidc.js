@@ -25,7 +25,7 @@ function Oidc(options) {
   }
 
   function redirectToAuthorize() {
-    window.location = options.authorizeEndpoint;
+    window.location = `${options.authorizeEndpoint}?state=${options.clientId}`;
   }
 
   function setUser(user) {
