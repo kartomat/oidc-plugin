@@ -31,7 +31,8 @@ OpenID connect provider, client id and client secret are configured in Origo ser
           sessionRefreshTimeout: 59,
           tokenEndpoint: '/origoserver/auth/access_token',
           authorizeEndpoint: '/origoserver/auth/authorize',
-          signOutUrl: 'url'
+          signOutUrl: 'url',
+          clientId: 'sigtuna',
         },
         client => {
           if (client.getUser().authenticated) {
@@ -57,3 +58,4 @@ Option | Type | Description
 `tokenEndpoint` | string | Path to origo server access token endpoint - Required
 `authorizeEndpoint` | string | Path to origo server authorize endpoint - Required
 `signOutUrl` | string | Redirects to set url after sign out if provided
+`clientId` | string | Specifies which origo client origo server will redirect to after successful openId authentication - Required
