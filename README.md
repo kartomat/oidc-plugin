@@ -1,7 +1,7 @@
 # OIDC plugin
 Plugin for OpenID Connect authorization with Origo.
 
-Requires Origo 2.1.1 or later, Origo server with auth (not yet in the core) and an OpenID connect provider.
+Requires Origo 2.1.1 or later, Origo server with auth and an OpenID connect provider.
 
 OpenID connect provider, client id and client secret are configured in Origo server.
 
