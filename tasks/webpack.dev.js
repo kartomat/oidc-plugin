@@ -14,8 +14,7 @@ module.exports = merge(common, {
   devtool: 'source-map',
   module: {},
   devServer: {
-    contentBase: './',
-    port: 9001,
-    writeToDisk: true
+    static: './',
+    port: 9001
   }
 });
